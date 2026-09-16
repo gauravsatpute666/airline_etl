@@ -1,0 +1,170 @@
+<svg viewBox="0 0 900 620" width="900" height="620" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, -apple-system, sans-serif">
+  <title>Airline ETL Architecture — Medallion Architecture on Databricks</title>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L8,3.5 Z" fill="#6b7280"/>
+    </marker>
+    <marker id="arrow-gold" markerWidth="8" markerHeight="8" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L0,7 L8,3.5 Z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="#f9fafb" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">Airline ETL — Databricks Medallion Architecture</text>
+  <text x="450" y="58" text-anchor="middle" font-size="12" fill="#6b7280">Kaggle → DBFS Raw → Bronze → Silver → Gold (Delta Lake)</text>
+
+  <!-- SOURCE -->
+  <g transform="translate(32, 90)">
+    <rect width="120" height="80" rx="10" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="60" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">KAGGLE</text>
+    <text x="60" y="44" text-anchor="middle" font-size="10" fill="#1e40af">Flight Delay</text>
+    <text x="60" y="57" text-anchor="middle" font-size="10" fill="#1e40af">Dataset</text>
+    <text x="60" y="72" text-anchor="middle" font-size="9" fill="#3b82f6">2018–2022 · ~30M rows</text>
+  </g>
+
+  <!-- Notebook 01 badge -->
+  <rect x="32" y="192" width="120" height="26" rx="5" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="92" y="209" text-anchor="middle" font-size="9.5" fill="#1d4ed8">01_setup.py</text>
+
+  <!-- Arrow: Kaggle → Raw -->
+  <line x1="154" y1="130" x2="218" y2="130" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="186" y="122" text-anchor="middle" font-size="9" fill="#6b7280">Kaggle API</text>
+
+  <!-- DBFS RAW -->
+  <g transform="translate(220, 90)">
+    <rect width="130" height="80" rx="10" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1.5"/>
+    <text x="65" y="26" text-anchor="middle" font-size="11" font-weight="700" fill="#374151">DBFS RAW</text>
+    <text x="65" y="41" text-anchor="middle" font-size="10" fill="#4b5563">/airline_etl/raw/</text>
+    <text x="65" y="56" text-anchor="middle" font-size="10" fill="#4b5563">CSV files</text>
+    <text x="65" y="71" text-anchor="middle" font-size="9" fill="#9ca3af">as-is, unmodified</text>
+  </g>
+
+  <!-- Arrow: Raw → Bronze -->
+  <line x1="352" y1="130" x2="416" y2="130" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="384" y="122" text-anchor="middle" font-size="9" fill="#6b7280">spark.read.csv</text>
+
+  <!-- BRONZE -->
+  <g transform="translate(418, 70)">
+    <rect width="140" height="20" rx="4" fill="#78350f"/>
+    <text x="70" y="14" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" letter-spacing="1">BRONZE</text>
+    <rect y="22" width="140" height="118" rx="8" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+    <text x="70" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">bronze_flights</text>
+    <text x="70" y="57" text-anchor="middle" font-size="9" fill="#78350f">Delta · all STRING cols</text>
+    <line x1="10" y1="65" x2="130" y2="65" stroke="#fcd34d" stroke-width="0.8"/>
+    <text x="14" y="79"  font-size="9" fill="#92400e">+ _ingested_at  (timestamp)</text>
+    <text x="14" y="92"  font-size="9" fill="#92400e">+ _source_file  (lineage)</text>
+    <text x="14" y="105" font-size="9" fill="#92400e">  overwriteSchema = true</text>
+    <text x="14" y="118" font-size="9" fill="#92400e">  autoCompact enabled</text>
+    <text x="14" y="131" font-size="9" fill="#b45309">  idempotent overwrite</text>
+  </g>
+
+  <!-- Notebook 02 badge -->
+  <rect x="418" y="205" width="140" height="26" rx="5" fill="#fffbeb" stroke="#fde68a" stroke-width="1"/>
+  <text x="488" y="222" text-anchor="middle" font-size="9.5" fill="#b45309">02_ingest_bronze.py</text>
+
+  <!-- Arrow: Bronze → Silver -->
+  <line x1="560" y1="130" x2="624" y2="130" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="592" y="122" text-anchor="middle" font-size="9" fill="#6b7280">transform</text>
+
+  <!-- SILVER -->
+  <g transform="translate(626, 70)">
+    <rect width="148" height="20" rx="4" fill="#1e3a5f"/>
+    <text x="74" y="14" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" letter-spacing="1">SILVER</text>
+    <rect y="22" width="148" height="178" rx="8" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
+    <text x="74" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">silver_flights</text>
+    <text x="74" y="57" text-anchor="middle" font-size="9" fill="#1e40af">Delta · partitioned YEAR/MONTH</text>
+    <line x1="10" y1="64" x2="138" y2="64" stroke="#93c5fd" stroke-width="0.8"/>
+    <text x="14" y="78"  font-size="9" fill="#1e40af">Cast 30+ cols to DOUBLE</text>
+    <text x="14" y="91"  font-size="9" fill="#1e40af">FL_DATE to DateType</text>
+    <text x="14" y="104" font-size="9" fill="#1e40af">HHMM times to Timestamp</text>
+    <text x="14" y="117" font-size="9" fill="#1e40af">Null fill (delays to 0.0)</text>
+    <text x="14" y="130" font-size="9" fill="#1e40af">TRIM + UPPER codes</text>
+    <text x="14" y="143" font-size="9" fill="#1e40af">IS_DELAYED / IS_CANCELLED</text>
+    <text x="14" y="156" font-size="9" fill="#1e40af">TOTAL_DELAY_MIN derived</text>
+    <text x="14" y="169" font-size="9" fill="#1e40af">DELAY_BUCKET category</text>
+    <text x="14" y="182" font-size="9" fill="#1e40af">Drop junk rows</text>
+  </g>
+
+  <!-- Notebook 03 badge -->
+  <rect x="626" y="267" width="148" height="26" rx="5" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="700" y="284" text-anchor="middle" font-size="9.5" fill="#1d4ed8">03_transform_silver.py</text>
+
+  <!-- Arrow down from Silver to Gold -->
+  <line x1="700" y1="295" x2="700" y2="315" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Gold tier label -->
+  <rect x="210" y="315" width="560" height="20" rx="4" fill="#064e3b"/>
+  <text x="490" y="329" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" letter-spacing="1">GOLD</text>
+
+  <!-- Gold Card 1: carrier_perf -->
+  <g transform="translate(210, 337)">
+    <rect width="168" height="128" rx="8" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+    <text x="84" y="20" text-anchor="middle" font-size="10.5" font-weight="700" fill="#064e3b">gold_carrier_perf</text>
+    <text x="84" y="34" text-anchor="middle" font-size="9" fill="#065f46">grain: carrier x yr x mo</text>
+    <line x1="10" y1="41" x2="158" y2="41" stroke="#6ee7b7" stroke-width="0.8"/>
+    <text x="14" y="55"  font-size="9" fill="#065f46">total_flights</text>
+    <text x="14" y="68"  font-size="9" fill="#065f46">avg_dep_delay_min</text>
+    <text x="14" y="81"  font-size="9" fill="#065f46">avg_arr_delay_min</text>
+    <text x="14" y="94"  font-size="9" fill="#065f46">on_time_pct</text>
+    <text x="14" y="107" font-size="9" fill="#065f46">cancellation_rate_pct</text>
+    <text x="14" y="120" font-size="9" fill="#065f46">unique_routes</text>
+  </g>
+
+  <!-- Gold Card 2: route_delays -->
+  <g transform="translate(406, 337)">
+    <rect width="168" height="128" rx="8" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+    <text x="84" y="20" text-anchor="middle" font-size="10.5" font-weight="700" fill="#064e3b">gold_route_delays</text>
+    <text x="84" y="34" text-anchor="middle" font-size="9" fill="#065f46">grain: origin to dest x yr</text>
+    <line x1="10" y1="41" x2="158" y2="41" stroke="#6ee7b7" stroke-width="0.8"/>
+    <text x="14" y="55"  font-size="9" fill="#065f46">total_flights</text>
+    <text x="14" y="68"  font-size="9" fill="#065f46">avg_dep_delay_min</text>
+    <text x="14" y="81"  font-size="9" fill="#065f46">distance_miles</text>
+    <text x="14" y="94"  font-size="9" fill="#065f46">avg_scheduled_duration_hr</text>
+    <text x="14" y="107" font-size="9" fill="#065f46">cancellation_rate_pct</text>
+    <text x="14" y="120" font-size="9" fill="#065f46">min 30 flights filter</text>
+  </g>
+
+  <!-- Gold Card 3: monthly_trends -->
+  <g transform="translate(602, 337)">
+    <rect width="168" height="128" rx="8" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1.5"/>
+    <text x="84" y="20" text-anchor="middle" font-size="10.5" font-weight="700" fill="#064e3b">gold_monthly_trends</text>
+    <text x="84" y="34" text-anchor="middle" font-size="9" fill="#065f46">grain: year x month</text>
+    <line x1="10" y1="41" x2="158" y2="41" stroke="#6ee7b7" stroke-width="0.8"/>
+    <text x="14" y="55"  font-size="9" fill="#065f46">total_flights</text>
+    <text x="14" y="68"  font-size="9" fill="#065f46">avg_dep_delay_min</text>
+    <text x="14" y="81"  font-size="9" fill="#065f46">on_time_pct</text>
+    <text x="14" y="94"  font-size="9" fill="#065f46">active_carriers</text>
+    <text x="14" y="107" font-size="9" fill="#065f46">total_distance_MM_miles</text>
+    <text x="14" y="120" font-size="9" fill="#065f46">cancellation_rate_pct</text>
+  </g>
+
+  <!-- Notebook 04 badge -->
+  <rect x="340" y="477" width="300" height="26" rx="5" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1"/>
+  <text x="490" y="494" text-anchor="middle" font-size="9.5" fill="#065f46">04_aggregate_gold.py</text>
+
+  <!-- Fan-out connector lines Silver to Gold cards -->
+  <line x1="700" y1="315" x2="294" y2="337" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-gold)"/>
+  <line x1="700" y1="315" x2="490" y2="337" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-gold)"/>
+  <line x1="700" y1="315" x2="686" y2="337" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-gold)"/>
+
+  <!-- LEGEND -->
+  <g transform="translate(32, 510)">
+    <rect width="160" height="90" rx="8" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="10" y="18" font-size="10" font-weight="700" fill="#374151">Legend</text>
+    <rect x="10" y="26" width="12" height="12" rx="2" fill="#fef3c7" stroke="#fcd34d" stroke-width="1"/>
+    <text x="28" y="37" font-size="9" fill="#4b5563">Bronze — raw strings</text>
+    <rect x="10" y="44" width="12" height="12" rx="2" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+    <text x="28" y="55" font-size="9" fill="#4b5563">Silver — typed and clean</text>
+    <rect x="10" y="62" width="12" height="12" rx="2" fill="#d1fae5" stroke="#6ee7b7" stroke-width="1"/>
+    <text x="28" y="73" font-size="9" fill="#4b5563">Gold — aggregated</text>
+    <line x1="10" y1="81" x2="22" y2="81" stroke="#9ca3af" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="28" y="85" font-size="9" fill="#4b5563">fan-out to Gold tables</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="450" y="590" text-anchor="middle" font-size="9" fill="#9ca3af">Delta storage: dbfs:/airline_etl/{raw, bronze, silver, gold}  |  Database: airline_etl.*</text>
+</svg>
